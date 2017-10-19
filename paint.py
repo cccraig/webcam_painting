@@ -159,7 +159,10 @@ class Follow():
         mask = cv2.inRange(hsv, self.bl, self.bu)
         mask = cv2.erode(mask, self.kernel, iterations=1)
         mask = cv2.dilate(mask, self.kernel, iterations=1)
-        cv2.imshow("mask", mask)
+        
+        # Uncomment below line to see the mask.
+        # It should show a single, small white spot.
+        # cv2.imshow("mask", mask)
 
         # Find contours in the mask and initialize the current (x,y) center of ball
         cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
