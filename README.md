@@ -15,7 +15,9 @@ Whats a webcam painting program without some easy ways to change colors or line 
 
 #### Colors
 r => changes color to red
+
 b => changes color to blue
+
 g => changes color to green
 y => changes color to yellow
 o => changes color to orange
