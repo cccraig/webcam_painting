@@ -19,17 +19,25 @@ r => changes color to red
 b => changes color to blue
 
 g => changes color to green
+
 y => changes color to yellow
+
 o => changes color to orange
+
 k => changes color to black
+
 w => changes color to white
 
 #### Line sizes
 s => changes size to 5 pixels
+
 m => changes size to 10 pixels
+
 l => changes size to 15 pixels
 
 #### Other features
 c => clears all drawings on the screen
+
 p => pauses drawing
+
 esc => exits the program
