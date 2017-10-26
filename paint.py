@@ -1,6 +1,5 @@
 from collections import deque
 from threading import Thread
-from Queue import Queue
 import numpy as np
 import cv2
 
@@ -153,16 +152,15 @@ class Follow():
 
 
 
-    def track(self, hsv, frame):
+    def track(self, hsv):
 
         # Construct a mask
         mask = cv2.inRange(hsv, self.bl, self.bu)
         mask = cv2.erode(mask, self.kernel, iterations=1)
         mask = cv2.dilate(mask, self.kernel, iterations=1)
-        
-        # Uncomment below line to see the mask.
-        # It should show a single, small white spot.
-        # cv2.imshow("mask", mask)
+
+        # Short code for frame
+        frame = self.frame
 
         # Find contours in the mask and initialize the current (x,y) center of ball
         cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -194,9 +192,6 @@ class Follow():
         # Stop flag
         self.halt = 0
 
-        # Frame queue
-        self.f_queue = Queue()
-
         # Initialize thread
         self.t = Thread(target=self.update)
 
@@ -215,10 +210,7 @@ class Follow():
         while not self.halt:
 
             # Grab the current web frame
-            frame = self.camera.read()[1]
-
-            # Put it in the queue
-            self.f_queue.put(frame)
+            self.frame = self.camera.read()[1]
 
         # Release the Camera
         self.camera.release()
@@ -232,56 +224,54 @@ class Follow():
 
     def capture(self):
 
+        # Wait a moment until we have a frame instance
+        cv2.waitKey(500) & 0xFF
+
         # Loop untill we stop
         while not self.halt:
 
-            if not self.f_queue.empty():
+            # Convert to HSV colorspace
+            hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
 
-                # Grab the current web frame
-                frame = self.f_queue.get()
+            # Look for balls
+            frame = self.track(hsv)
 
-                # Convert to HSV colorspace
-                hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            # show the frame to our screen
+            cv2.imshow("Frame", frame)
 
-                # Look for balls
-                frame = self.track(hsv, frame)
+            # exit on escape
+            k = cv2.waitKey(5) & 0xFF
 
-                # show the frame to our screen
-                cv2.imshow("Frame", frame)
+            if k == 27:
+                self.halt = 1
+                break
 
-                # exit on escape
-                k = cv2.waitKey(5) & 0xFF
+            # Pause (p)
+            elif k == 112:
+                if self.pause:
+                    self.pause = 0
+                else:
+                    self.pause = 1
 
-                if k == 27:
-                    self.halt = 1
-                    break
+            # Clear the screen ( c )
+            elif k == 99:
+                self.bpts = deque()
 
-                # Pause (p)
-                elif k == 112:
-                    if self.pause:
-                        self.pause = 0
-                    else:
-                        self.pause = 1
+            # Colors
+            elif k in self.colors:
+                self.line = self.colors[k]
 
-                # Clear the screen ( c )
-                elif k == 99:
-                    self.bpts = deque()
+            # Draw small ( s )
+            elif k == 115:
+                self.buff = 5
 
-                # Colors
-                elif k in self.colors:
-                    self.line = self.colors[k]
+            # Draw medium ( m )
+            elif k == 109:
+                self.buff = 10
 
-                # Draw small ( s )
-                elif k == 115:
-                    self.buff = 5
-
-                # Draw medium ( m )
-                elif k == 109:
-                    self.buff = 10
-
-                # Draw large ( l )
-                elif k == 108:
-                    self.buff = 15
+            # Draw large ( l )
+            elif k == 108:
+                self.buff = 15
 
 
 tracker = Follow()
